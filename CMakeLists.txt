@@ -1,55 +1,37 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.29)
 
 project(CPP_CODE)
 
+# 设置 C 和 C++ 标准
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
-# # 强制使用 GCC
-# set(CMAKE_C_COMPILER "gcc")
-# set(CMAKE_CXX_COMPILER "g++")
 
-# 设置不同构建类型的输出目录
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
+# 收集所有 C 和 C++ 源文件
+file(GLOB C_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
+file(GLOB CPP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/release/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/release/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/release/bin)
+# 合并所有源文件
+set(ALL_SRC ${C_SRC} ${CPP_SRC})
 
-file(GLOB SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+# 设置输出目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+# 创建目录（确保目录存在）
+file(MAKE_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
-# 如果没有指定构建类型，默认为Debug
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
-endif()
+add_executable(main ${ALL_SRC})
 
-add_executable(main ${SRC})
-
-# 使用现代的方式设置头文件目录
+# 设置头文件目录
 target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# 为不同构建类型设置编译选项
-target_compile_definitions(main PRIVATE
-    $<$<CONFIG:Release>:NDEBUG>
-)
-
-target_compile_options(main PRIVATE
-    $<$<CONFIG:Release>:-O3 -march=native>
-    $<$<CONFIG:Debug>:-O0 -g3 -ggdb>
-)
-
-# 设置Release模式下的链接选项
-target_link_options(main PRIVATE
-    $<$<CONFIG:Release>:-s>
-)
 
 # # 配置 Debug 版本
-# cmake -B build_debug -G "MinGW Makefiles" -D CMAKE_BUILD_TYPE=Debug
+# cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
 # # 构建 Debug 版本
-# cmake --build build_debug
+# cmake --build build
+# # 可执行文件会在 build/bin/main.exe（Windows）或 build/bin/main（Linux/Mac）
 
 # # 配置 Release 版本
-# cmake -B build_release -G "MinGW Makefiles" -D CMAKE_BUILD_TYPE=Release
+# cmake -B build_release -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 # # 构建 Release 版本
 # cmake --build build_release
